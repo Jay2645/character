@@ -2,61 +2,47 @@
 #include "core/os/input.h"
 
 CommandManager::CommandManager() {
-	connect("ready", this, "_ready");
+	set_physics_process(true);
+}
+
+void CommandManager::_notification(int p_notification) {
+	if (p_notification == NOTIFICATION_PHYSICS_PROCESS) {
+		_physics_process(get_physics_process_delta_time());
+	}
+	Node::_notification(p_notification);
 }
 
 void CommandManager::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_ready"), &CommandManager::_ready);
-
-	ClassDB::bind_method(D_METHOD("set_command_paths", "command_paths"), &CommandManager::set_command_paths);
-	ClassDB::bind_method(D_METHOD("get_command_paths"), &CommandManager::get_command_paths);
-	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "command_paths", PROPERTY_HINT_NONE, "Commands"), "set_command_paths", "get_command_paths");
+	ADD_SIGNAL(MethodInfo("execute_command"));
 }
 
-void CommandManager::_ready() {
-	commands.clear();
-	for (int i = 0; i < command_paths.size(); i++) {
-		CommandNode* _found_node = find_command_node(command_paths[i]);
-		if (_found_node != NULL) {
-			commands.push_back(_found_node);
-		}
-	}
-	update_configuration_warning();
-	print_line("Current command length: " + itos(commands.size()));
+void CommandManager::_physics_process(float delta_time) {
+	_execute_all_commands(delta_time);
 }
 
-CommandNode* CommandManager::find_command_node(NodePath command_path) {
-	if (has_node(command_path)) {
-		return cast_to<CommandNode>(get_node(command_path));
-	} else {
-		return NULL;
+void CommandManager::_execute_all_commands(float delta_time) {
+	if (_command_reciever == NULL) {
+		print_error("Command reciever is null!");
+		return;
+	}
+
+	emit_signal(EXECUTE_COMMAND_NAME, _command_reciever, delta_time);
+}
+
+void CommandManager::set_reciever(Object *reciever) {
+	_command_reciever = reciever;
+}
+
+void CommandManager::add_listener(CommandNode *listener, StringName execute_command) {
+	if (!is_connected(EXECUTE_COMMAND_NAME, listener, execute_command)) {
+		print_line("Connecting to manager.");
+		connect(EXECUTE_COMMAND_NAME, listener, execute_command);
 	}
 }
 
-String CommandManager::get_configuration_warning() const {
-	if (commands.size() == 0) {
-		return String("You need to define some commands for the command manager to do anything!");
+void CommandManager::remove_listener(CommandNode *listener, StringName execute_command) {
+	if (is_connected(EXECUTE_COMMAND_NAME, listener, execute_command)) {
+		print_line("Disconnecting from manager.");
+		disconnect(EXECUTE_COMMAND_NAME, listener, execute_command);
 	}
-	return String();
-}
-
-void CommandManager::set_command_paths(const Array &p_command_array) {
-	command_paths.resize(p_command_array.size());
-	commands.clear();
-	for (int i = 0; i < command_paths.size(); i++) {
-		command_paths.write[i] = p_command_array[i];
-		CommandNode *_found_node = find_command_node(command_paths[i]);
-		if (_found_node != NULL) {
-			commands.push_back(_found_node);
-		}
-	}
-	update_configuration_warning();
-}
-
-Array CommandManager::get_command_paths() const {
-	Array out;
-	for (int i = 0; i < command_paths.size(); i++) {
-		out.push_back(command_paths[i]);
-	}
-	return out;
 }

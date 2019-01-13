@@ -2,15 +2,14 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "scene/3d/physics_body.h"
-#include "scene/3d/collision_shape.h"
-#include "scene/3d/spatial.h"
 #include "scene/3d/camera.h"
+#include "scene/3d/collision_shape.h"
+#include "scene/3d/physics_body.h"
+#include "scene/3d/spatial.h"
 
 #include "command_manager.h"
 
-class Character : public KinematicBody
-{
+class Character : public KinematicBody {
 	GDCLASS(Character, KinematicBody);
 
 protected:
