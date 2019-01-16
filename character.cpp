@@ -1,98 +1,80 @@
 #include "character.h"
-#include "command_manager.h"
 #include "scene/3d/camera.h"
 #include "scene/3d/collision_shape.h"
 #include "scene/3d/spatial.h"
 
 Character::Character() {
-	connect("ready", this, "_ready");
+	connect("ready", this, "_character_ready");
+	set_physics_process(true);
+
+	_command_manager = NULL;
+	_movement = NULL;
 }
 
-Character::~Character() {
+void Character::_character_ready() {
+	if (has_node(command_manager_path)) {
+		_command_manager = cast_to<CommandManager>(get_node(command_manager_path));
+		if (_command_manager != NULL) {
+			_command_manager->set_reciever(this);
+		}
+	}
+	if (has_node(character_movement_path)) {
+		_movement = cast_to<CharacterMovement>(get_node(character_movement_path));
+	}
+}
+
+void Character::_notification(int p_notification) {
+	if (p_notification == NOTIFICATION_PHYSICS_PROCESS) {
+		_physics_process(get_physics_process_delta_time());
+	}
+	KinematicBody::_notification(p_notification);
+}
+
+void Character::_physics_process(float delta_time) {
+	if (_command_manager != NULL) {
+		_command_manager->execute_all_commands(delta_time);
+	}
+	if (_movement != NULL) {
+		_movement->process_movement(delta_time);
+	}
 }
 
 void Character::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("_ready"), &Character::_ready);
+	ClassDB::bind_method(D_METHOD("_character_ready"), &Character::_character_ready);
+
+	ClassDB::bind_method(D_METHOD("set_command_manager_path", "command_paths"), &Character::set_command_manager_path);
+	ClassDB::bind_method(D_METHOD("get_command_manager_path"), &Character::get_command_manager_path);
+	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "command_manager_path", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "CommandManager"), "set_command_manager_path", "get_command_manager_path");
+
+	ClassDB::bind_method(D_METHOD("set_character_movement_path", "movement_path"), &Character::set_character_movement_path);
+	ClassDB::bind_method(D_METHOD("get_character_movement_path"), &Character::get_character_movement_path);
+	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "character_movement_path", PROPERTY_HINT_NODE_PATH_VALID_TYPES, "CharacterMovement"), "set_character_movement_path", "get_character_movement_path");
+
+	ClassDB::bind_method(D_METHOD("get_character_movement"), &Character::get_character_movement);
 }
 
-void Character::_ready() {
-	const String _body_collision_name = String("Body_Collision");
-	const String _feet_collision_name = String("Feet_Collision");
-	const String _rotation_helper_name = String("Rotation_Helper");
-	const String _model_base_name = String("Model");
-	const String _character_camera_name = String("Camera");
-	const String _command_manager_name = String("Command_Manager");
-
-	if (get_child_count() > 0) {
-		for (int i = 0; i < get_child_count(); i++) {
-			Node *child = get_child(i);
-			if (child->get_name() == _body_collision_name) {
-				_body_collision = cast_to<CollisionShape>(child);
-			} else if (child->get_name() == _feet_collision_name) {
-				_feet_collision = cast_to<CollisionShape>(child);
-			} else if (child->get_name() == _rotation_helper_name) {
-				_rotation_helper = cast_to<Spatial>(child);
-			} else if (child->get_name() == _command_manager_name) {
-				_command_manager = cast_to<CommandManager>(child);
-			}
-		}
-		if (_rotation_helper != NULL) {
-			for (int i = 0; i < _rotation_helper->get_child_count(); i++) {
-				Node *child = _rotation_helper->get_child(i);
-				if (child->get_name() == _model_base_name) {
-					_model_base = cast_to<Spatial>(child);
-				} else if (child->get_name() == _character_camera_name) {
-					_character_camera = cast_to<Camera>(child);
-				}
-			}
-		}
+void Character::set_command_manager_path(const NodePath &new_path) {
+	command_manager_path = new_path;
+	if (has_node(command_manager_path)) {
+		_command_manager = cast_to<CommandManager>(get_node(command_manager_path));
 	}
+}
 
-	Node *owner = get_owner();
-	if (owner == NULL) {
-		owner = this;
-	}
+NodePath Character::get_command_manager_path() const {
+	return command_manager_path;
+}
 
-	if (_body_collision == NULL) {
-		_body_collision = memnew(CollisionShape);
-		_body_collision->set_name(_body_collision_name);
-		add_child(_body_collision);
-		_body_collision->set_owner(owner);
+void Character::set_character_movement_path(const NodePath &new_path) {
+	character_movement_path = new_path;
+	if (has_node(character_movement_path)) {
+		_movement = cast_to<CharacterMovement>(get_node(character_movement_path));
 	}
+}
 
-	if (_feet_collision == NULL) {
-		_feet_collision = memnew(CollisionShape);
-		_feet_collision->set_name(_feet_collision_name);
-		add_child(_feet_collision);
-		_feet_collision->set_owner(owner);
-	}
+NodePath Character::get_character_movement_path() const {
+	return character_movement_path;
+}
 
-	if (_rotation_helper == NULL) {
-		_rotation_helper = memnew(Spatial);
-		_rotation_helper->set_name(_rotation_helper_name);
-		add_child(_rotation_helper);
-		_rotation_helper->set_owner(owner);
-	}
-
-	if (_model_base == NULL) {
-		_model_base = memnew(Spatial);
-		_model_base->set_name(_model_base_name);
-		_rotation_helper->add_child(_model_base);
-		_model_base->set_owner(owner);
-	}
-
-	if (_character_camera == NULL) {
-		_character_camera = memnew(Camera);
-		_character_camera->set_name(_character_camera_name);
-		_rotation_helper->add_child(_character_camera);
-		_character_camera->set_owner(owner);
-	}
-
-	if (_command_manager == NULL) {
-		_command_manager = memnew(CommandManager);
-		_command_manager->set_name(_command_manager_name);
-		add_child(_command_manager);
-		_command_manager->set_owner(owner);
-		_command_manager->set_reciever(this);
-	}
+CharacterMovement *Character::get_character_movement() const {
+	return _movement;
 }
