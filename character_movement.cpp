@@ -55,9 +55,9 @@ void CharacterMovement::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_jump_speed"), &CharacterMovement::get_jump_speed);
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "jump_speed"), "set_jump_speed", "get_jump_speed");
 
-	ClassDB::bind_method(D_METHOD("set_jump_speed", "jump_speed"), &CharacterMovement::set_max_speed);
-	ClassDB::bind_method(D_METHOD("get_jump_speed"), &CharacterMovement::get_max_speed);
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "jump_speed"), "set_jump_speed", "get_jump_speed");
+	ClassDB::bind_method(D_METHOD("set_max_speed", "max_speed"), &CharacterMovement::set_max_speed);
+	ClassDB::bind_method(D_METHOD("get_max_speed"), &CharacterMovement::get_max_speed);
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "max_speed"), "set_max_speed", "get_max_speed");
 
 	ClassDB::bind_method(D_METHOD("set_acceleration", "acceleration"), &CharacterMovement::set_acceleration);
 	ClassDB::bind_method(D_METHOD("get_acceleration"), &CharacterMovement::get_acceleration);
