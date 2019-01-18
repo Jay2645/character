@@ -6,6 +6,7 @@ CharacterMovement::CharacterMovement() {
 	MAX_SPEED = 20.0f;
 	MAX_SLOPE = 40.0f;
 	ACCELERATION = 4.5f;
+	DECELERATION = 16.0f;
 	MAX_LOOK_UP = 70.0f;
 	MOUSE_SENSITIVITY = 0.5f;
 	INVERT_Y = false;
@@ -116,7 +117,7 @@ void CharacterMovement::process_movement(float delta_time) {
 	_horizontal_velocity.y = 0.0;
 
 	float _accel = _dir.dot(_horizontal_velocity) > 0 ? ACCELERATION : DECELERATION;
-	_horizontal_velocity = _horizontal_velocity.linear_interpolate(_dir * MAX_SPEED, ACCELERATION * delta_time);
+	_horizontal_velocity = _horizontal_velocity.linear_interpolate(_dir * MAX_SPEED, _accel * delta_time);
 	_vel.x = _horizontal_velocity.x;
 	_vel.z = _horizontal_velocity.z;
 	_vel = _move_body->move_and_slide(_vel, Vector3(0.0, 1.0, 0.0), false, 4, Math::deg2rad(MAX_SLOPE));
