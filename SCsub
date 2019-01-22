@@ -1,4 +1,6 @@
 Import('env')
 
 env.add_source_files(env.modules_sources,"*.cpp")
-
+env.add_source_files(env.modules_sources,"character/*.cpp")
+env.add_source_files(env.modules_sources,"damage/*.cpp")
+env.add_source_files(env.modules_sources,"fsm/*.cpp")

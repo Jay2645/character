@@ -8,7 +8,7 @@
 
 #include "fsm/state.h"
 #include "fsm/state_machine.h"
-#include "fsm/state_transition.h"
+#include "fsm/state_machine_transition.h"
 
 void register_character_types() {
 
@@ -20,7 +20,7 @@ void register_character_types() {
 
 	ClassDB::register_class<FSMState>();
 	ClassDB::register_class<StateMachine>();
-	ClassDB::register_class<StateTransition>();
+	ClassDB::register_class<StateMachineTransition>();
 }
 
 void unregister_character_types() {
