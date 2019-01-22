@@ -9,10 +9,10 @@
 #include "fsm/state.h"
 #include "fsm/state_machine.h"
 #include "fsm/state_machine_transition.h"
+#include "fsm/state_machine_node.h"
 
 void register_character_types() {
 
-	ClassDB::register_class<StateMachineNode>();
 	ClassDB::register_class<Character>();
 	ClassDB::register_class<CharacterMovement>();
 
@@ -22,9 +22,8 @@ void register_character_types() {
 	ClassDB::register_class<FSMState>();
 	ClassDB::register_class<StateMachine>();
 	ClassDB::register_class<StateMachineTransition>();
+	ClassDB::register_class<StateMachineNode>();
 }
 
 void unregister_character_types() {
-
 }
-

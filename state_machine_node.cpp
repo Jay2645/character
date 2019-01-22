@@ -1,5 +1,5 @@
 #include "state_machine_node.h"
-#include "modules/fsm/state_machine.h"
+#include "fsm/state_machine.h"
 
 StateMachineNode::StateMachineNode() {
 }

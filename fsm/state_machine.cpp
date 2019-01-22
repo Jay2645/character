@@ -32,20 +32,27 @@
 
 void StateMachine::add_node(const StringName &p_name, Ref<Resource> p_node, const Vector2 &p_position) {
 
-	ERR_FAIL_COND(states.has(p_name));
 	ERR_FAIL_COND(p_node.is_null());
+	ERR_FAIL_COND(states.has(p_name));
 	ERR_FAIL_COND(String(p_name).find("/") != -1);
 
 	Ref<FSMState> state(memnew(FSMState));
 	state->node = p_node;
 	state->position = p_position;
 
+	add_state(p_name, state);
+}
+
+void StateMachine::add_state(const StringName &p_name, Ref<FSMState> state) {
+	ERR_FAIL_COND(states.has(p_name));
+	ERR_FAIL_COND(String(p_name).find("/") != -1);
+
 	states[p_name] = state;
 
 	emit_changed();
 	emit_signal("tree_changed");
 
-	p_node->connect("tree_changed", this, "_tree_changed", varray(), CONNECT_REFERENCE_COUNTED);
+	state->node->connect("tree_changed", this, "_tree_changed", varray(), CONNECT_REFERENCE_COUNTED);
 }
 
 Ref<Resource> StateMachine::get_node(const StringName &p_name) const {
@@ -443,6 +450,7 @@ void StateMachine::_tree_changed() {
 void StateMachine::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("add_node", "name", "node", "position"), &StateMachine::add_node, DEFVAL(Vector2()));
+	ClassDB::bind_method(D_METHOD("add_state", "name", "state"), &StateMachine::add_state);
 	ClassDB::bind_method(D_METHOD("get_node", "name"), &StateMachine::get_node);
 	ClassDB::bind_method(D_METHOD("remove_node", "name"), &StateMachine::remove_node);
 	ClassDB::bind_method(D_METHOD("rename_node", "name", "new_name"), &StateMachine::rename_node);

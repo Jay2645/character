@@ -12,6 +12,9 @@ public:
 	Ref<Resource> node;
 	Vector2 position;
 
+public:
+	FSMState();
+
 };
 
 #endif

@@ -61,6 +61,8 @@ protected:
 
 public:
 	void add_node(const StringName &p_name, Ref<Resource> p_node, const Vector2 &p_position = Vector2());
+	void add_state(const StringName &p_name, Ref<FSMState> state);
+
 	Ref<Resource> get_node(const StringName &p_name) const;
 	void remove_node(const StringName &p_name);
 	void rename_node(const StringName &p_name, const StringName &p_new_name);
