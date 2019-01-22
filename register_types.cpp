@@ -12,6 +12,7 @@
 
 void register_character_types() {
 
+	ClassDB::register_class<StateMachineNode>();
 	ClassDB::register_class<Character>();
 	ClassDB::register_class<CharacterMovement>();
 
